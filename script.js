@@ -1,12 +1,22 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreElement = document.getElementById('score');
+const livesElement = document.getElementById('lives');
+const highScoreElement = document.getElementById('highScore');
+const gameOverScreen = document.getElementById('gameOverScreen');
+const finalScoreElement = document.getElementById('finalScore');
+const gameOverTitle = document.getElementById('gameOverTitle');
 
 let score = 0;
+let lives = 5;
+let highScore = localStorage.getItem('bubbleSmasherBest') || 0;
+let isGameOver = false;
 let bubbles = [];
 let particles = [];
 let width, height;
 let spawnTimer = 0;
+
+highScoreElement.textContent = highScore;
 
 // Colors for bubbles
 const bubbleColors = [
@@ -92,7 +102,43 @@ class Particle {
     }
 }
 
+function gameOver() {
+    isGameOver = true;
+    finalScoreElement.textContent = score;
+
+    if (score > highScore) {
+        highScore = score;
+        localStorage.setItem('bubbleSmasherBest', highScore);
+        highScoreElement.textContent = highScore;
+        gameOverTitle.textContent = "New Best Score!";
+        gameOverTitle.style.color = "#ffd93d";
+    } else {
+        gameOverTitle.textContent = "Game Over";
+        gameOverTitle.style.color = "#ff6b6b";
+    }
+
+    gameOverScreen.style.display = "flex";
+}
+
+function resetGame() {
+    score = 0;
+    lives = 5;
+    bubbles = [];
+    particles = [];
+    spawnTimer = 0;
+    isGameOver = false;
+
+    scoreElement.textContent = score;
+    livesElement.textContent = lives;
+    gameOverScreen.style.display = "none";
+}
+
 function handleInput(x, y) {
+    if (isGameOver) {
+        resetGame();
+        return;
+    }
+
     for (let i = bubbles.length - 1; i >= 0; i--) {
         const b = bubbles[i];
         const dist = Math.hypot(x - b.x, y - b.y);
@@ -123,12 +169,14 @@ function animate(time) {
     ctx.clearRect(0, 0, width, height);
 
     // Spawn bubbles
-    spawnTimer++;
-    // Spawn faster as score increases, cap at a minimum interval
-    const spawnRate = Math.max(20, 60 - Math.floor(score / 50));
-    if (spawnTimer >= spawnRate) {
-        bubbles.push(new Bubble());
-        spawnTimer = 0;
+    if (!isGameOver) {
+        spawnTimer++;
+        // Spawn faster as score increases, cap at a minimum interval
+        const spawnRate = Math.max(20, 60 - Math.floor(score / 50));
+        if (spawnTimer >= spawnRate) {
+            bubbles.push(new Bubble());
+            spawnTimer = 0;
+        }
     }
 
     // Update and draw bubbles
@@ -140,7 +188,13 @@ function animate(time) {
         // Remove if off screen top
         if (b.y + b.radius < 0) {
             bubbles.splice(i, 1);
-            // Optional: reset or subtract score here for missed bubbles
+            if (!isGameOver) {
+                lives--;
+                livesElement.textContent = lives;
+                if (lives <= 0) {
+                    gameOver();
+                }
+            }
         }
     }
 

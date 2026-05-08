@@ -12,7 +12,14 @@
 <body>
     <div id="ui">
         <div id="scoreDisplay">Score: <span id="score">0</span></div>
+        <div id="highScoreDisplay">Best: <span id="highScore">0</span></div>
+        <div id="livesDisplay">Lives: <span id="lives">5</span></div>
         <div id="instruction">Tap or Click to Smash!</div>
+    </div>
+    <div id="gameOverScreen" style="display: none;">
+        <h1 id="gameOverTitle">Game Over</h1>
+        <p>Score: <span id="finalScore">0</span></p>
+        <p>Tap to Restart</p>
     </div>
     <canvas id="gameCanvas"></canvas>
     <script src="script.js"></script>
