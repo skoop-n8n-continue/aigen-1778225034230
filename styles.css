@@ -1,0 +1,46 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: linear-gradient(180deg, #10181f 0%, #005652 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    touch-action: none; /* Prevent zooming/scrolling on touch */
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+#ui {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: #ffffff;
+    z-index: 10;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#scoreDisplay {
+    font-size: 32px;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
+}
+
+#score {
+    color: #00b7af;
+}
+
+#instruction {
+    font-size: 16px;
+    opacity: 0.8;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
