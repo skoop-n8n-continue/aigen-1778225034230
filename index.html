@@ -10,7 +10,23 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="ui">
+    <div id="startScreen">
+        <h1>Bubble Smasher</h1>
+        <div class="stats">
+            <p>Best Score: <span id="startBestScore">0</span></p>
+        </div>
+        <div class="rules">
+            <p><strong>Rules:</strong></p>
+            <ul>
+                <li>Tap standard bubbles to smash them (+10 pts)</li>
+                <li>Smash glowing gold bubbles for bonus points (+100 pts)</li>
+                <li>Missing a standard bubble costs 1 life</li>
+                <li>Missing 5 standard bubbles = Game Over</li>
+            </ul>
+        </div>
+        <button id="playBtn">Play</button>
+    </div>
+    <div id="ui" style="display: none;">
         <div id="scoreDisplay">Score: <span id="score">0</span></div>
         <div id="highScoreDisplay">Best: <span id="highScore">0</span></div>
         <div id="livesDisplay">Lives: <span id="lives">5</span></div>

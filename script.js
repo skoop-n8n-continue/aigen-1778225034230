@@ -1,8 +1,12 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+const uiElement = document.getElementById('ui');
 const scoreElement = document.getElementById('score');
 const livesElement = document.getElementById('lives');
 const highScoreElement = document.getElementById('highScore');
+const startScreen = document.getElementById('startScreen');
+const startBestScore = document.getElementById('startBestScore');
+const playBtn = document.getElementById('playBtn');
 const gameOverScreen = document.getElementById('gameOverScreen');
 const finalScoreElement = document.getElementById('finalScore');
 const gameOverTitle = document.getElementById('gameOverTitle');
@@ -11,12 +15,21 @@ let score = 0;
 let lives = 5;
 let highScore = localStorage.getItem('bubbleSmasherBest') || 0;
 let isGameOver = false;
+let gameStarted = false;
 let bubbles = [];
 let particles = [];
 let width, height;
 let spawnTimer = 0;
 
 highScoreElement.textContent = highScore;
+startBestScore.textContent = highScore;
+
+playBtn.addEventListener('click', () => {
+    startScreen.style.display = 'none';
+    uiElement.style.display = 'flex';
+    resetGame();
+    gameStarted = true;
+});
 
 // Colors for bubbles
 const bubbleColors = [
@@ -121,12 +134,14 @@ class Particle {
 
 function gameOver() {
     isGameOver = true;
+    gameStarted = false;
     finalScoreElement.textContent = score;
 
     if (score > highScore) {
         highScore = score;
         localStorage.setItem('bubbleSmasherBest', highScore);
         highScoreElement.textContent = highScore;
+        startBestScore.textContent = highScore;
         gameOverTitle.textContent = "New Best Score!";
         gameOverTitle.style.color = "#ffd93d";
     } else {
@@ -135,6 +150,7 @@ function gameOver() {
     }
 
     gameOverScreen.style.display = "flex";
+    uiElement.style.display = "none";
 }
 
 function resetGame() {
@@ -144,13 +160,17 @@ function resetGame() {
     particles = [];
     spawnTimer = 0;
     isGameOver = false;
+    gameStarted = true;
 
     scoreElement.textContent = score;
     livesElement.textContent = lives;
     gameOverScreen.style.display = "none";
+    uiElement.style.display = "flex";
 }
 
 function handleInput(x, y) {
+    if (!gameStarted) return;
+
     if (isGameOver) {
         resetGame();
         return;
@@ -191,44 +211,57 @@ canvas.addEventListener('touchstart', (e) => {
 function animate(time) {
     ctx.clearRect(0, 0, width, height);
 
-    // Spawn bubbles
-    if (!isGameOver) {
-        spawnTimer++;
-        // Spawn faster as score increases, cap at a minimum interval
-        const spawnRate = Math.max(20, 60 - Math.floor(score / 50));
-        if (spawnTimer >= spawnRate) {
-            bubbles.push(new Bubble());
-            spawnTimer = 0;
+    if (gameStarted) {
+        // Spawn bubbles
+        if (!isGameOver) {
+            spawnTimer++;
+            // Spawn faster as score increases, cap at a minimum interval
+            const spawnRate = Math.max(20, 60 - Math.floor(score / 50));
+            if (spawnTimer >= spawnRate) {
+                bubbles.push(new Bubble());
+                spawnTimer = 0;
+            }
         }
-    }
 
-    // Update and draw bubbles
-    for (let i = bubbles.length - 1; i >= 0; i--) {
-        const b = bubbles[i];
-        b.update();
-        b.draw();
+        // Update and draw bubbles
+        for (let i = bubbles.length - 1; i >= 0; i--) {
+            const b = bubbles[i];
+            b.update();
+            b.draw();
 
-        // Remove if off screen top
-        if (b.y + b.radius < 0) {
-            bubbles.splice(i, 1);
-            if (!isGameOver && !b.isBonus) {
-                lives--;
-                livesElement.textContent = lives;
-                if (lives <= 0) {
-                    gameOver();
+            // Remove if off screen top
+            if (b.y + b.radius < 0) {
+                bubbles.splice(i, 1);
+                if (!isGameOver && !b.isBonus) {
+                    lives--;
+                    livesElement.textContent = lives;
+                    if (lives <= 0) {
+                        gameOver();
+                    }
                 }
             }
         }
-    }
 
-    // Update and draw particles
-    for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
-        p.update();
-        p.draw();
+        // Update and draw particles
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.update();
+            p.draw();
 
-        if (p.alpha <= 0) {
-            particles.splice(i, 1);
+            if (p.alpha <= 0) {
+                particles.splice(i, 1);
+            }
+        }
+    } else {
+        // Just draw a few passive background bubbles for the start screen
+        if (bubbles.length < 5) {
+            if (Math.random() < 0.05) bubbles.push(new Bubble());
+        }
+        for (let i = bubbles.length - 1; i >= 0; i--) {
+            const b = bubbles[i];
+            b.update();
+            b.draw();
+            if (b.y + b.radius < 0) bubbles.splice(i, 1);
         }
     }
 
