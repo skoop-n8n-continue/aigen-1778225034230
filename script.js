@@ -38,12 +38,21 @@ resizeCanvas();
 
 class Bubble {
     constructor() {
-        this.radius = Math.random() * 30 + 20; // 20 to 50
+        this.isBonus = Math.random() < 0.1; // 10% chance to be a bonus bubble
+
+        if (this.isBonus) {
+            this.radius = Math.random() * 20 + 15; // 15 to 35 (slightly smaller)
+            this.speedY = -(Math.random() * 3 + 2); // Faster upward speed
+            this.color = 'rgba(255, 215, 0, 0.8)'; // Gold color for bonus
+        } else {
+            this.radius = Math.random() * 30 + 20; // 20 to 50
+            this.speedY = -(Math.random() * 2 + 1); // Normal upward speed
+            this.color = bubbleColors[Math.floor(Math.random() * bubbleColors.length)];
+        }
+
         this.x = Math.random() * (width - this.radius * 2) + this.radius;
         this.y = height + this.radius;
-        this.speedY = -(Math.random() * 2 + 1); // Upward speed
         this.speedX = (Math.random() - 0.5) * 1; // Slight horizontal drift
-        this.color = bubbleColors[Math.floor(Math.random() * bubbleColors.length)];
         this.wobbleOffset = Math.random() * Math.PI * 2;
         this.wobbleSpeed = Math.random() * 0.05 + 0.02;
     }
@@ -65,8 +74,16 @@ class Bubble {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
         ctx.fill();
 
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+        if (this.isBonus) {
+            // Draw a glowing core for bonus bubbles
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius * 0.4, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.fill();
+        }
+
+        ctx.lineWidth = this.isBonus ? 3 : 2;
+        ctx.strokeStyle = this.isBonus ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.8)';
         ctx.stroke();
     }
 }
@@ -149,7 +166,13 @@ function handleInput(x, y) {
                 particles.push(new Particle(b.x, b.y, b.color));
             }
             bubbles.splice(i, 1);
-            score += 10;
+
+            if (b.isBonus) {
+                score += 100; // 10x points for bonus bubble
+            } else {
+                score += 10;
+            }
+
             scoreElement.textContent = score;
             // Only smash one bubble per click/tap
             break;
@@ -188,7 +211,7 @@ function animate(time) {
         // Remove if off screen top
         if (b.y + b.radius < 0) {
             bubbles.splice(i, 1);
-            if (!isGameOver) {
+            if (!isGameOver && !b.isBonus) {
                 lives--;
                 livesElement.textContent = lives;
                 if (lives <= 0) {
