@@ -53,13 +53,15 @@ class Bubble {
     constructor() {
         this.isBonus = Math.random() < 0.1; // 10% chance to be a bonus bubble
 
+        const speedMultiplier = 1 + (score / 500);
+
         if (this.isBonus) {
             this.radius = Math.random() * 20 + 15; // 15 to 35 (slightly smaller)
-            this.speedY = -(Math.random() * 3 + 2); // Faster upward speed
+            this.speedY = -(Math.random() * 3 + 2) * speedMultiplier; // Faster upward speed
             this.color = 'rgba(255, 215, 0, 0.8)'; // Gold color for bonus
         } else {
             this.radius = Math.random() * 30 + 20; // 20 to 50
-            this.speedY = -(Math.random() * 2 + 1); // Normal upward speed
+            this.speedY = -(Math.random() * 2 + 1) * speedMultiplier; // Normal upward speed
             this.color = bubbleColors[Math.floor(Math.random() * bubbleColors.length)];
         }
 
